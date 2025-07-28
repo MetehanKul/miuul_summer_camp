@@ -36,11 +36,9 @@ print("Medyan:", np.median(a))
 # Soru 3:
 # 0 ile 1 arasında 10 eşit aralıklı sayı üretin.
 # Bu sayılardan 0.5'ten büyük olanları filtreleyip yazdırın.
-
-np.random.seed(0)  # Tekrarlanabilirlik için
+# Tekrarlanabilirlik için
 sayilar = np.linspace(0, 1, 10)
-
-sayilar[sayilar > 0.5]
+filtrelenmis = sayilar[sayilar > 0.5]
 print("0.5'ten büyük sayılar:", filtrelenmis)
 
 
@@ -64,9 +62,8 @@ print("Carat ve Price İlk 5 Satır:\n", df[["carat", "price"]].head())
 ###############################
 # Soru 6:
 # Fiyatı 15.000’den fazla olan kaç elmas var?
-filt = df["price"] > 15000
-count = df[filt].count()[0]
-print("Fiyatı 15.000'den fazla olan elmas sayısı:", count)
+count = df[df["price"] > 15000].shape[0]
+print("15.000'den pahalı elmas sayısı:", count)
 
 ###############################
 # Soru 7:
@@ -93,7 +90,5 @@ print("Renklerin Sayısı:\n", color_count)
 # Soru 10:
 # “cut” ve “clarity” kombinasyonlarına göre ortalama fiyatları hesaplayın.
 
-df.groupby(["cut" , "clarity"])["price"].mean()
-
-df.head()
-df["clarity"].value_counts()
+ortalama_fiyat = df.groupby(["cut" , "clarity"])["price"].mean()
+print("Ortalama :" , ortalama_fiyat)
