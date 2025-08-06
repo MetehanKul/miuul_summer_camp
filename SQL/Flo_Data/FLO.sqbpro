@@ -1,50 +1,113 @@
-<?xml version="1.0" encoding="UTF-8"?><sqlb_project><db path="FLO.db" readonly="0" foreign_keys="1" case_sensitive_like="0" temp_store="0" wal_autocheckpoint="1000" synchronous="2"/><attached/><window><main_tabs open="structure browser pragmas query" current="3"/></window><tab_structure><column_width id="0" width="300"/><column_width id="1" width="0"/><column_width id="2" width="100"/><column_width id="3" width="2457"/><column_width id="4" width="0"/><expanded_item id="0" parent="1"/><expanded_item id="1" parent="1"/><expanded_item id="2" parent="1"/><expanded_item id="3" parent="1"/></tab_structure><tab_browse><table title="flo" custom_title="0" dock_id="1" table="4,3:mainflo"/><dock_state state="000000ff00000000fd0000000100000002000007740000038ffc0100000001fb000000160064006f0063006b00420072006f00770073006500310100000000000007740000011e00ffffff000002690000000000000004000000040000000800000008fc00000000"/><default_encoding codec=""/><browse_table_settings/></tab_browse><tab_sql><sql name="SQL 1*">SELECT * from flo;
+<?xml version="1.0" encoding="UTF-8"?><sqlb_project><db path="FLO.db" readonly="0" foreign_keys="1" case_sensitive_like="0" temp_store="0" wal_autocheckpoint="1000" synchronous="2"/><attached/><window><main_tabs open="structure browser pragmas query" current="3"/></window><tab_structure><column_width id="0" width="300"/><column_width id="1" width="0"/><column_width id="2" width="100"/><column_width id="3" width="2457"/><column_width id="4" width="0"/><expanded_item id="0" parent="1"/><expanded_item id="1" parent="1"/><expanded_item id="2" parent="1"/><expanded_item id="3" parent="1"/></tab_structure><tab_browse><table title="flo" custom_title="0" dock_id="1" table="4,3:mainflo"/><dock_state state="000000ff00000000fd0000000100000002000007740000038ffc0100000001fb000000160064006f0063006b00420072006f00770073006500310100000000000007740000016600ffffff000007740000000000000004000000040000000800000008fc00000000"/><default_encoding codec=""/><browse_table_settings><table schema="main" name="flo" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_" freeze_columns="0"><sort/><column_widths><column index="1" value="295"/><column index="2" value="95"/><column index="3" value="118"/><column index="4" value="102"/><column index="6" value="141"/><column index="7" value="142"/><column index="8" value="179"/><column index="9" value="180"/><column index="10" value="209"/><column index="11" value="208"/><column index="12" value="300"/><column index="13" value="71"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table></browse_table_settings></tab_browse><tab_sql><sql name="SQL 1*">SELECT * from flo;
+
+-- Soru1: Kaç farklı müşterinin alışveriş yaptığını gösterecek sorguyu yazınız.
+SELECT count(DISTINCT(master_id)) as Benzersiz_Müşteri FROM flo;
+
+-- Soru2:  Toplam yapılan alışveriş sayısı ve ciroyu getirecek sorguyu yazınız.
+SELECT 
+	SUM(order_num_total_ever_offline + order_num_total_ever_online) as Toplam_Alışveriş, 
+	SUM(customer_value_total_ever_offline + customer_value_total_ever_online) as Toplam_Ciro
+FROM flo;
+
+-- Soru3: Alışveriş başına ortalama ciroyu getirecek sorguyu yazınız. 
+SELECT 
+	SUM(customer_value_total_ever_offline + customer_value_total_ever_online) / SUM(order_num_total_ever_offline+order_num_total_ever_online) 
+	as Alışveriş_başına_ortalama_ciro
+FROM flo;
+
+-- Soru4: En son alışveriş yapılan kanal (last_order_channel) üzerinden yapılan alışverişlerin toplam ciro ve alışveriş sayılarını getirecek sorguyu yazınız.
+SELECT 
+	last_order_channel as Son_Alışveriş_Kanalı,
+	SUM(customer_value_total_ever_offline + customer_value_total_ever_online) as Toplam_Ciro,
+	SUM(order_num_total_ever_offline+order_num_total_ever_online) AS Toplam_Sipariş_Sayısı
+FROM flo
+GROUP BY last_order_channel;
+	
+-- Soru5: Store type kırılımında elde edilen toplam ciroyu getiren sorguyu yazınız.
+SELECT store_type,
+	SUM(customer_value_total_ever_offline + customer_value_total_ever_online) as Toplam_Ciro
+FROM flo
+GROUP BY store_type;
+
+-- Soru6: En son alışveriş yapılan kanal kırılımında alışveriş başına ortalama ciroyu hesaplayacak sorguyu yazınız. 
+SELECT 
+	last_order_channel,
+	sum(customer_value_total_ever_offline + customer_value_total_ever_online) as Toplam_Ciro,
+	sum(order_num_total_ever_offline+order_num_total_ever_online) as Toplam_Sipariş_Sayısı,
+	SUM(customer_value_total_ever_offline + customer_value_total_ever_online) / SUM(order_num_total_ever_offline+order_num_total_ever_online)
+	as Verimlilik
+FROM flo 
+GROUP BY last_order_channel;
+
+--Soru7: Yıl kırılımında alışveriş sayılarını getirecek sorguyu yazınız (Yıl olarak müşterinin ilk alışveriş tarihi (first_order_date) yılını baz alınız)
+SELECT strftime('%Y', first_order_date) AS Yıl, 
+       SUM(order_num_total_ever_offline + order_num_total_ever_online) AS Sipariş_Sayısı
+FROM flo
+GROUP BY strftime('%Y', first_order_date)
+order by 1 DESC;
 
--- Soru1: Kaç farklı müşterinin alışveriş yaptığını gösterecek sorguyu yazınız.
-SELECT count(DISTINCT(master_id)) as Benzersiz_Müşteri FROM flo;
-
--- Soru2:  Toplam yapılan alışveriş sayısı ve ciroyu getirecek sorguyu yazınız.
+-- Soru8:  En çok tercih edilen store_type bilgisini getiren sorguyu yazınız. 
 SELECT 
-	SUM(order_num_total_ever_offline + order_num_total_ever_online) as Toplam_Alışveriş, 
-	SUM(customer_value_total_ever_offline + customer_value_total_ever_online) as Toplam_Ciro
-FROM flo;
-
--- Soru3: Alışveriş başına ortalama ciroyu getirecek sorguyu yazınız. 
-SELECT 
-	SUM(customer_value_total_ever_offline + customer_value_total_ever_online) / SUM(order_num_total_ever_offline+order_num_total_ever_online) 
-	as Alışveriş_başına_ortalama_ciro
-FROM flo;
-
--- Soru4: En son alışveriş yapılan kanal (last_order_channel) üzerinden yapılan alışverişlerin toplam ciro ve alışveriş sayılarını getirecek sorguyu yazınız.
-SELECT 
-	last_order_channel as Son_Alışveriş_Kanalı,
-	SUM(customer_value_total_ever_offline + customer_value_total_ever_online) as Toplam_Ciro,
-	SUM(order_num_total_ever_offline+order_num_total_ever_online) AS Toplam_Sipariş_Sayısı
-FROM flo
-GROUP BY last_order_channel;
-	
--- Soru5: Store type kırılımında elde edilen toplam ciroyu getiren sorguyu yazınız.
-SELECT store_type,
-	SUM(customer_value_total_ever_offline + customer_value_total_ever_online) as Toplam_Ciro
-FROM flo
-GROUP BY store_type;
-
--- Soru6: En son alışveriş yapılan kanal kırılımında alışveriş başına ortalama ciroyu hesaplayacak sorguyu yazınız. 
-SELECT 
-	last_order_channel,
-	sum(customer_value_total_ever_offline + customer_value_total_ever_online) as Toplam_Ciro,
-	sum(order_num_total_ever_offline+order_num_total_ever_online) as Toplam_Sipariş_Sayısı,
-	SUM(customer_value_total_ever_offline + customer_value_total_ever_online) / SUM(order_num_total_ever_offline+order_num_total_ever_online)
-	as Verimlilik
+    store_type,
+    COUNT(*) AS Top_1_Store_Type
 FROM flo 
-GROUP BY last_order_channel;
+GROUP BY store_type
+LIMIT 1;
 
---Soru7: Yıl kırılımında alışveriş sayılarını getirecek sorguyu yazınız (Yıl olarak müşterinin ilk alışveriş tarihi (first_order_date) yılını baz alınız)
-SELECT strftime('%Y', first_order_date) AS Yıl, 
-       SUM(order_num_total_ever_offline + order_num_total_ever_online) AS Sipariş_Sayısı
-FROM flo
-GROUP BY strftime('%Y', first_order_date)
-order by 1 DESC
+-- Soru9:   En son alışveriş yapılan kanal (last_order_channel) bazında, en çok ilgi gören kategoriyi ve bu kategoriden ne kadarlık alışveriş yapıldığını getiren sorguyu yazınız
+SELECT 
+    f1.last_order_channel,
+    (
+        SELECT f2.interested_in_categories_12
+        FROM flo f2
+        WHERE f2.last_order_channel = f1.last_order_channel
+        GROUP BY f2.interested_in_categories_12
+        ORDER BY SUM(f2.order_num_total_ever_online + f2.order_num_total_ever_offline) DESC
+        LIMIT 1
+    ) AS kategori,
+    (
+        SELECT SUM(f3.order_num_total_ever_online + f3.order_num_total_ever_offline)
+        FROM flo f3
+        WHERE f3.last_order_channel = f1.last_order_channel
+          AND f3.interested_in_categories_12 = (
+              SELECT f4.interested_in_categories_12
+              FROM flo f4
+              WHERE f4.last_order_channel = f1.last_order_channel
+              GROUP BY f4.interested_in_categories_12
+              ORDER BY SUM(f4.order_num_total_ever_online + f4.order_num_total_ever_offline) DESC
+              LIMIT 1
+          )
+    ) AS alisveris_sayisi
+FROM flo f1
+GROUP BY f1.last_order_channel
+;
 
+-- Soru10: En çok alışveriş yapan müşterinin ID’ sini ve yaptığı alışveriş sayısını getiren sorguyu yazınız.
+SELECT 
+	master_id ,
+	sum(customer_value_total_ever_offline + customer_value_total_ever_online) AS Alışveriş_sayısı
+ FROM flo
+ GROUP by master_id
+ order by 2 DESC
+ limit 1;
+ 
+ -- Soru11:  En çok alışveriş yapan kişinin alışveriş başına ortalama cirosunu ve alışveriş yapma gün ortalamasını (alışveriş sıklığını) getiren sorguyu yazınız. 
+select *,
+		round((D.Toplam_Ciro / D.Toplam_Spariş_Sayısı),2) as Spariş_Başına_Ortalama
+FROM	
+		(select master_id , 
+		sum(customer_value_total_ever_offline + customer_value_total_ever_online) as Toplam_Ciro,
+		sum(order_num_total_ever_offline + order_num_total_ever_online) as Toplam_Spariş_Sayısı
+		from flo 
+		GROUP by master_id
+		order by 2 DESC
+		limit 1 ) D ;
+ 
+									
 
+										
+										
+
+
+
 </sql><current_tab id="0"/></tab_sql></sqlb_project>
